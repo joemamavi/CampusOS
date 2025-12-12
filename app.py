@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, Response
 from models import db, Subject, Assignment, Event, Note, AttendanceLog, Settings
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import calendar as cal_module
 import re
 import random
 import csv
 import io
+from collections import Counter
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///planner.db'
@@ -22,21 +23,37 @@ with app.app_context():
 @app.route('/')
 def dashboard():
     subjects = Subject.query.all()
+    
+    # 1. Assignments Logic
     pending_assignments = Assignment.query.filter(
         Assignment.due_date >= date.today(),
         Assignment.status == 'Pending'
     ).order_by(Assignment.is_exam.desc(), Assignment.due_date).all()
+    
     completed_assignments = Assignment.query.filter_by(status='Done').order_by(Assignment.due_date.desc()).all()
     exams = [a for a in pending_assignments if a.is_exam]
     notes = Note.query.all()
     settings = Settings.query.first()
     
+    # 2. WORKLOAD HEATMAP LOGIC (Problem 3)
+    # Count assignments per due date
+    all_dates = [task.due_date for task in pending_assignments]
+    date_counts = Counter(all_dates)
+    
+    # Filter days with >= 3 tasks (Bottlenecks)
+    bottlenecks = []
+    for d, count in date_counts.items():
+        if count >= 3:
+            bottlenecks.append({'date': d, 'count': count})
+    
+    # Sort by date
+    bottlenecks.sort(key=lambda x: x['date'])
+
+    # Quotes
     quotes = [
-        "The best way to predict your future is to create it.",
-        "Success is the sum of small efforts, repeated day in and day out.",
-        "Don't watch the clock; do what it does. Keep going.",
-        "You don't have to be great to start, but you have to start to be great.",
-        "The expert in anything was once a beginner."
+        "The code you write today is the documentation for tomorrow.",
+        "First, solve the problem. Then, write the code.",
+        "Talk is cheap. Show me the code."
     ]
     daily_quote = random.choice(quotes)
 
@@ -48,8 +65,58 @@ def dashboard():
                            notes=notes,
                            today=date.today(),
                            quote=daily_quote,
-                           settings=settings)
+                           settings=settings,
+                           bottlenecks=bottlenecks) # Pass bottlenecks to template
 
+# --- NEW: HOLIDAY PLANNER LOGIC (Problem 1) ---
+@app.route('/forecast', methods=['POST'])
+def forecast_attendance():
+    start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d').date()
+    end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
+    
+    subjects = Subject.query.all()
+    alerts = []
+    
+    # Helper to map day names to integers (0=Mon, 6=Sun)
+    day_map = {'MON': 0, 'TUE': 1, 'WED': 2, 'THU': 3, 'FRI': 4, 'SAT': 5, 'SUN': 6}
+    
+    # Iterate through every day in the holiday range
+    delta = end_date - start_date
+    for i in range(delta.days + 1):
+        current_day = start_date + timedelta(days=i)
+        current_weekday = current_day.weekday() # 0-6
+        
+        # Check every subject to see if it has a class on this day
+        for sub in subjects:
+            if sub.schedule:
+                # Schedule string: "Mon 9AM, Wed 2PM"
+                # Normalize to uppercase and check if day matches
+                schedule_parts = sub.schedule.upper().split(',')
+                for part in schedule_parts:
+                    # Check if any day abbreviation matches current weekday
+                    for day_name, day_idx in day_map.items():
+                        if day_name in part and day_idx == current_weekday:
+                            # We found a class that will be missed!
+                            # Temporarily increment total_classes (simulate missing it)
+                            # Note: We do NOT increment 'attended'
+                            sub.total_classes += 1
+    
+    # Calculate Impact
+    for sub in subjects:
+        # Check if the simulated attendance drops below 75%
+        if sub.attendance_percentage < 75:
+            alerts.append({
+                'code': sub.code,
+                'name': sub.name,
+                'new_percent': sub.attendance_percentage
+            })
+    
+    # IMPORTANT: Rollback changes so we don't actually save this simulation to DB
+    db.session.rollback()
+    
+    return render_template('forecast_result.html', alerts=alerts, start=start_date, end=end_date)
+
+# --- EXISTING ROUTES (No Changes) ---
 @app.route('/search')
 def search():
     query = request.args.get('q', '')

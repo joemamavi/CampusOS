@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Holiday Forecast</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+    <style>body { background-color: #f4f7f6; font-family: 'Manrope', sans-serif; }</style>
+</head>
+<body class="py-5">
+    <div class="container" style="max-width: 600px;">
+        <div class="card shadow border-0">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h4 class="fw-bold">Forecasting Results</h4>
+                <p class="text-muted">If you skip from <strong>{{ start }}</strong> to <strong>{{ end }}</strong>...</p>
+            </div>
+            <div class="card-body px-4 pb-4">
+                {% if alerts %}
+                    <div class="alert alert-danger">
+                        <strong>⚠️ Danger Zone!</strong> The following subjects will drop below 75%:
+                    </div>
+                    <ul class="list-group">
+                        {% for item in alerts %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold">{{ item.code }}</span> 
+                                <span class="text-muted small ms-1">{{ item.name }}</span>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">{{ item.new_percent }}%</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-success text-center py-4">
+                        <h5>✅ Safe to Travel!</h5>
+                        <p class="mb-0">No subjects will drop below 75% attendance.</p>
+                    </div>
+                {% endif %}
+                
+                <a href="/" class="btn btn-outline-secondary w-100 mt-4">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
