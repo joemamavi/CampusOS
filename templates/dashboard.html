@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .low-attendance { color: #dc3545; font-weight: bold; }
+        .card-header { background-color: #f8f9fa; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <h1 class="mb-4 text-center">🎓 University Planner</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>📚 My Subjects</span>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#subjectModal">+ Add Subject</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Prof</th>
+                                    <th>Attendance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sub in subjects %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ sub.code }}</strong><br>
+                                        <small class="text-muted">{{ sub.name }}</small>
+                                    </td>
+                                    <td>{{ sub.professor }}</td>
+                                    <td>
+                                        <span class="{% if sub.attendance_percentage < 75 %}low-attendance{% endif %}">
+                                            {{ sub.attendance_percentage }}%
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">{{ sub.attended }}/{{ sub.total_classes }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="/update_attendance/{{ sub.id }}/present" class="btn btn-sm btn-success">Present</a>
+                                        <a href="/update_attendance/{{ sub.id }}/absent" class="btn btn-sm btn-danger">Absent</a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-center text-muted">No subjects added yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>📝 Upcoming Deadlines</span>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#taskModal">+ Add</button>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for task in assignments %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">{{ task.title }}</div>
+                            <small class="text-muted">{{ task.subject.code }}</small>
+                        </div>
+                        {% if task.due_date == today %}
+                            <span class="badge bg-danger rounded-pill">Today!</span>
+                        {% else %}
+                            <span class="badge bg-secondary rounded-pill">{{ task.due_date }}</span>
+                        {% endif %}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted text-center">No upcoming work! 🎉</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="subjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/add_subject" method="POST">
+                <div class="modal-header"><h5 class="modal-title">Add New Subject</h5></div>
+                <div class="modal-body">
+                    <input type="text" name="name" class="form-control mb-2" placeholder="Subject Name (e.g. Calculus)" required>
+                    <input type="text" name="code" class="form-control mb-2" placeholder="Code (e.g. MAT101)" required>
+                    <input type="text" name="prof" class="form-control" placeholder="Professor Name">
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary">Save</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="taskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/add_assignment" method="POST">
+                <div class="modal-header"><h5 class="modal-title">Add Assignment</h5></div>
+                <div class="modal-body">
+                    <select name="subject_id" class="form-select mb-2" required>
+                        <option value="" disabled selected>Select Subject</option>
+                        {% for sub in subjects %}
+                        <option value="{{ sub.id }}">{{ sub.code }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="title" class="form-control mb-2" placeholder="Task Title" required>
+                    <label>Due Date:</label>
+                    <input type="date" name="due_date" class="form-control" required>
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary">Save</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
