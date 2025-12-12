@@ -8,37 +8,175 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #f0fdf4; font-family: 'Outfit', sans-serif; height: 100vh; overflow: hidden; color: #111827; }
-        .matrix-container { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: calc(100vh - 100px); gap: 20px; padding: 20px; }
-        .quadrant { background: white; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; border: 1px solid #d1fae5; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
-        .quadrant h6 { font-weight: 700; text-transform: uppercase; margin-bottom: 15px; font-size: 0.85rem; letter-spacing: 1px; color: #6b7280; }
-        .q1 { border-top: 4px solid #ef4444; } .q2 { border-top: 4px solid #10b981; } .q3 { border-top: 4px solid #f59e0b; } .q4 { border-top: 4px solid #6b7280; } 
-        .task-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: grab; color: #1f2937; transition: 0.2s; }
-        .task-card:hover { border-color: #10b981; transform: translateY(-2px); background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        .matrix-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            grid-template-rows: 1fr 1fr; 
+            height: calc(100vh - 100px); 
+            gap: 20px; 
+            padding: 20px; 
+        }
+        
+        .quadrant { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            border: 1px solid #d1fae5; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03); 
+        }
+        
+        /* Headers */
+        .quadrant h6 { 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            margin-bottom: 15px; 
+            font-size: 0.9rem; 
+            letter-spacing: 0.5px; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Basis of Division Labels */
+        .basis-label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            opacity: 0.7;
+            text-transform: none; /* Keep natural case for readability */
+            letter-spacing: normal;
+        }
+
+        /* Border Colors */
+        .q1 { border-top: 5px solid #ef4444; } /* Red */
+        .q2 { border-top: 5px solid #10b981; } /* Green/Emerald */
+        .q3 { border-top: 5px solid #f59e0b; } /* Yellow */
+        .q4 { border-top: 5px solid #6b7280; } /* Grey */
+        
+        /* Text Colors for Headers */
+        .text-q1 { color: #ef4444; }
+        .text-q2 { color: #10b981; }
+        .text-q3 { color: #f59e0b; }
+        .text-q4 { color: #6b7280; }
+
+        /* Task Cards */
+        .task-card { 
+            background: #f9fafb; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 12px; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            cursor: grab; 
+            color: #1f2937; 
+            transition: 0.2s; 
+        }
+        .task-card:hover { 
+            border-color: #10b981; 
+            transform: translateY(-2px); 
+            background: white; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+        }
         .task-list { flex-grow: 1; overflow-y: auto; }
+        
         .btn-outline-dark { border-color: #d1d5db; }
         .btn-outline-dark:hover { background: white; }
     </style>
 </head>
 <body>
+
 <div class="d-flex justify-content-between align-items-center px-4 pt-4 pb-0">
     <h4 class="fw-bold text-dark"><i class="bi bi-layers-fill me-2 text-success"></i>Decision Matrix</h4>
     <a href="/" class="btn btn-outline-dark btn-sm bg-white">Dashboard</a>
 </div>
+
 <div class="matrix-container">
-    <div class="quadrant q1" ondragover="allowDrop(event)" ondrop="drop(event, 'q1')"><h6>Do First</h6><div class="task-list" id="q1-list">{% for t in matrix['q1'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
-    <div class="quadrant q2" ondragover="allowDrop(event)" ondrop="drop(event, 'q2')"><h6>Schedule</h6><div class="task-list" id="q2-list">{% for t in matrix['q2'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
-    <div class="quadrant q3" ondragover="allowDrop(event)" ondrop="drop(event, 'q3')"><h6>Delegate</h6><div class="task-list" id="q3-list">{% for t in matrix['q3'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
-    <div class="quadrant q4" ondragover="allowDrop(event)" ondrop="drop(event, 'q4')"><h6>Delete</h6><div class="task-list" id="q4-list">{% for t in matrix['q4'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
+    
+    <div class="quadrant q1" ondragover="allowDrop(event)" ondrop="drop(event, 'q1')">
+        <h6 class="text-q1">
+            <i class="bi bi-lightning-charge-fill"></i> DO FIRST 
+            <span class="basis-label">(Urgent & Important)</span>
+        </h6>
+        <div class="task-list" id="q1-list">
+            {% for t in matrix['q1'] %}
+                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
+                    <div class="fw-bold">{{ t.title }}</div>
+                    <div class="small text-muted">{{ t.subject.code }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="quadrant q2" ondragover="allowDrop(event)" ondrop="drop(event, 'q2')">
+        <h6 class="text-q2">
+            <i class="bi bi-calendar-check-fill"></i> SCHEDULE 
+            <span class="basis-label">(Important, Not Urgent)</span>
+        </h6>
+        <div class="task-list" id="q2-list">
+            {% for t in matrix['q2'] %}
+                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
+                    <div class="fw-bold">{{ t.title }}</div>
+                    <div class="small text-muted">{{ t.subject.code }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="quadrant q3" ondragover="allowDrop(event)" ondrop="drop(event, 'q3')">
+        <h6 class="text-q3">
+            <i class="bi bi-people-fill"></i> DELEGATE 
+            <span class="basis-label">(Urgent, Not Important)</span>
+        </h6>
+        <div class="task-list" id="q3-list">
+            {% for t in matrix['q3'] %}
+                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
+                    <div class="fw-bold">{{ t.title }}</div>
+                    <div class="small text-muted">{{ t.subject.code }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="quadrant q4" ondragover="allowDrop(event)" ondrop="drop(event, 'q4')">
+        <h6 class="text-q4">
+            <i class="bi bi-trash3-fill"></i> DELETE 
+            <span class="basis-label">(Neither)</span>
+        </h6>
+        <div class="task-list" id="q4-list">
+            {% for t in matrix['q4'] %}
+                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
+                    <div class="fw-bold">{{ t.title }}</div>
+                    <div class="small text-muted">{{ t.subject.code }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
+
 <script>
     function allowDrop(ev) { ev.preventDefault(); }
     function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    
     function drop(ev, quadrant) {
-        ev.preventDefault(); var data = ev.dataTransfer.getData("text");
-        var dropTarget = ev.target; while (!dropTarget.classList.contains('quadrant')) { dropTarget = dropTarget.parentElement; }
-        dropTarget.querySelector('.task-list').appendChild(document.getElementById(data));
-        fetch(`/update_quadrant/${data.split('-')[1]}/${quadrant}`);
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        var draggedElement = document.getElementById(data);
+        
+        // Ensure we drop into the task-list div, not the header
+        var dropTarget = ev.target;
+        while (!dropTarget.classList.contains('quadrant')) {
+            dropTarget = dropTarget.parentElement;
+        }
+        var list = dropTarget.querySelector('.task-list');
+        list.appendChild(draggedElement);
+
+        // Update Backend
+        var taskId = data.split('-')[1];
+        fetch(`/update_quadrant/${taskId}/${quadrant}`);
     }
 </script>
+
 </body>
 </html>

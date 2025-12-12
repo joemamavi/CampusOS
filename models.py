@@ -19,6 +19,7 @@ class Subject(db.Model):
     total_modules = db.Column(db.Integer, default=5)
     completed_student = db.Column(db.Float, default=0.0)
     completed_teacher = db.Column(db.Float, default=0.0)
+    
     assignments = db.relationship('Assignment', backref='subject', lazy=True, cascade="all, delete-orphan")
     attendance_logs = db.relationship('AttendanceLog', backref='subject', lazy=True, cascade="all, delete-orphan")
 
@@ -58,7 +59,6 @@ class Assignment(db.Model):
     is_exam = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(20), default='Pending')
     matrix_quadrant = db.Column(db.String(10), default='q2') 
-    # NEW: Color Tag (Stores values like 'emerald', 'blue', 'rose')
     color_tag = db.Column(db.String(20), default='emerald') 
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
 
@@ -66,7 +66,7 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     date = db.Column(db.Date, nullable=False)
-    tag = db.Column(db.String(20), default='emerald')
+    tag = db.Column(db.String(20), default='emerald') 
     description = db.Column(db.String(500))
 
 class Note(db.Model):
