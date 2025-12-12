@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
-from models import db, Subject, Assignment
+from models import db, Subject, Assignment, Event
 from datetime import datetime, date
-import re
+import calendar as cal_module # Renamed to avoid conflict
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///planner.db'
@@ -15,43 +15,97 @@ with app.app_context():
 @app.route('/')
 def dashboard():
     subjects = Subject.query.all()
-    
-    # Sort: Exams first, then by date
     assignments = Assignment.query.filter(
         Assignment.due_date >= date.today()
     ).order_by(Assignment.is_exam.desc(), Assignment.due_date).all()
-    
-    # Filter just exams for the hero section alert
     exams = [a for a in assignments if a.is_exam]
-
     return render_template('dashboard.html', subjects=subjects, assignments=assignments, exams=exams, today=date.today())
 
+# --- NEW: Interactive Calendar Logic ---
 @app.route('/calendar')
-def calendar():
-    subjects = Subject.query.all()
-    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-    hours = range(8, 19)
-    timetable = {h: {d: None for d in days} for h in hours}
+@app.route('/calendar/<int:year>/<int:month>')
+def calendar_view(year=None, month=None):
+    if year is None: 
+        now = datetime.now()
+        year, month = now.year, now.month
 
-    for sub in subjects:
-        if sub.schedule:
-            parts = sub.schedule.split(',')
-            for part in parts:
-                part = part.upper().strip()
-                found_day = None
-                for d in days:
-                    if d.upper() in part:
-                        found_day = d
-                        break
-                match = re.search(r'(\d+)', part)
-                if found_day and match:
-                    hour = int(match.group(1))
-                    if 'PM' in part and hour != 12: hour += 12
-                    if hour in timetable: timetable[hour][found_day] = sub
+    # 1. Get Month Matrix (List of weeks, where days are dates)
+    cal = cal_module.Calendar(firstweekday=0) # 0 = Monday
+    month_days = cal.monthdatescalendar(year, month)
 
-    return render_template('calendar.html', timetable=timetable, days=days, hours=hours)
+    # 2. Fetch All Events & Assignments
+    db_events = Event.query.all()
+    db_assignments = Assignment.query.all()
 
-# --- NEW: Resource Locker Routes ---
+    # 3. Organize by Date for easy lookup in template
+    # Structure: events_by_date['2023-10-25'] = [EventObj, AssignmentObj, ...]
+    events_by_date = {}
+
+    # Add Custom Events
+    for e in db_events:
+        d_str = e.date.strftime('%Y-%m-%d')
+        if d_str not in events_by_date: events_by_date[d_str] = []
+        events_by_date[d_str].append({
+            'title': e.title,
+            'tag': e.tag,
+            'is_assignment': False,
+            'id': e.id
+        })
+
+    # Add Assignments (Convert to Event format)
+    for a in db_assignments:
+        d_str = a.due_date.strftime('%Y-%m-%d')
+        if d_str not in events_by_date: events_by_date[d_str] = []
+        # Exams get 'danger' (Red), Assignments get 'warning' (Orange)
+        tag = 'danger' if a.is_exam else 'warning'
+        events_by_date[d_str].append({
+            'title': f"{a.subject.code}: {a.title}",
+            'tag': tag,
+            'is_assignment': True,
+            'id': a.id
+        })
+
+    # Navigation logic
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+
+    return render_template('calendar.html', 
+                           month_days=month_days, 
+                           events_by_date=events_by_date,
+                           current_year=year, 
+                           current_month=month,
+                           month_name=cal_module.month_name[month],
+                           prev_year=prev_year, prev_month=prev_month,
+                           next_year=next_year, next_month=next_month)
+
+@app.route('/add_event', methods=['POST'])
+def add_event():
+    title = request.form.get('title')
+    date_str = request.form.get('date')
+    tag = request.form.get('tag')
+    
+    new_event = Event(
+        title=title,
+        date=datetime.strptime(date_str, '%Y-%m-%d').date(),
+        tag=tag
+    )
+    db.session.add(new_event)
+    db.session.commit()
+    # Redirect back to the specific month
+    year, month = int(date_str.split('-')[0]), int(date_str.split('-')[1])
+    return redirect(url_for('calendar_view', year=year, month=month))
+
+@app.route('/delete_event/<int:id>')
+def delete_event(id):
+    event = Event.query.get_or_404(id)
+    db.session.delete(event)
+    db.session.commit()
+    return redirect(url_for('calendar_view'))
+# ----------------------------------------
+
+# ... (Keep existing resource/subject/assignment routes exactly as they were) ...
 @app.route('/subject/<int:id>')
 def subject_details(id):
     subject = Subject.query.get_or_404(id)
@@ -66,7 +120,6 @@ def update_resources(id):
     subject.notes = request.form.get('notes')
     db.session.commit()
     return redirect(url_for('subject_details', id=id))
-# -----------------------------------
 
 @app.route('/add_subject', methods=['POST'])
 def add_subject():
@@ -82,9 +135,7 @@ def add_subject():
 
 @app.route('/add_assignment', methods=['POST'])
 def add_assignment():
-    # Check if "is_exam" checkbox was checked
     is_exam = True if request.form.get('is_exam') else False
-    
     new_task = Assignment(
         title=request.form.get('title'),
         due_date=datetime.strptime(request.form.get('due_date'), '%Y-%m-%d').date(),

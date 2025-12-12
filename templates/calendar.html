@@ -2,71 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Timetable</title>
+    <title>{{ month_name }} {{ current_year }} - Calendar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { background-color: #F3F4F6; font-family: 'Inter', sans-serif; }
-        .calendar-container { max-width: 1000px; margin: 3rem auto; }
-        .header { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; padding: 2rem; border-radius: 1rem 1rem 0 0; }
-        .table-custom { background: white; border-radius: 0 0 1rem 1rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .time-col { width: 80px; background: #F9FAFB; font-weight: bold; color: #6B7280; text-align: center; vertical-align: middle; }
-        .day-header { text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.05em; color: #6B7280; padding: 1rem; background: #F9FAFB; }
-        
-        .class-card {
-            background-color: #EEF2FF;
-            border-left: 4px solid #4F46E5;
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-size: 0.9em;
-            color: #4F46E5;
-            transition: transform 0.2s;
+        :root {
+            --bg-body: #f4f7f6;
+            --primary-color: #2c3e50;
         }
-        .class-card:hover { transform: scale(1.02); cursor: pointer; }
-        .empty-cell { height: 60px; }
+        body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; }
+        h2, h5 { font-family: 'Manrope', sans-serif; }
+
+        /* Calendar Grid */
+        .calendar-table { table-layout: fixed; width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .calendar-table th { background: #f8f9fa; text-align: center; padding: 15px; font-weight: 600; color: #6c757d; text-transform: uppercase; font-size: 0.85rem; border-bottom: 1px solid #e9ecef; }
+        .calendar-table td { height: 140px; vertical-align: top; border: 1px solid #e9ecef; padding: 8px; transition: 0.2s; cursor: pointer; }
+        .calendar-table td:hover { background-color: #f8f9fa; }
+        
+        .day-number { font-weight: 700; color: #495057; margin-bottom: 8px; display: block; }
+        .text-muted-day { color: #dee2e6 !important; } /* Days from prev/next month */
+        
+        /* Event Badges */
+        .event-badge { 
+            display: block; 
+            padding: 4px 8px; 
+            margin-bottom: 4px; 
+            border-radius: 6px; 
+            font-size: 0.75rem; 
+            font-weight: 500; 
+            text-decoration: none; 
+            color: white; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            transition: 0.2s;
+        }
+        .event-badge:hover { opacity: 0.9; color: white; transform: translateY(-1px); }
+
+        /* Color Tags */
+        .bg-primary { background-color: #0d6efd !important; } /* Study/General */
+        .bg-danger { background-color: #dc3545 !important; }  /* Exams */
+        .bg-warning { background-color: #fd7e14 !important; color: white !important; } /* Assignments */
+        .bg-success { background-color: #198754 !important; } /* Social/Club */
+        .bg-info { background-color: #0dcaf0 !important; color: white !important; }   /* Work */
     </style>
 </head>
 <body>
 
-<div class="container calendar-container">
-    <div class="header d-flex justify-content-between align-items-center">
-        <h2 class="mb-0 fw-bold" style="font-family: 'Poppins'">📅 Weekly Schedule</h2>
-        <a href="/" class="btn btn-light text-primary fw-bold"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Dashboard</a>
+        
+        <div class="d-flex align-items-center gap-3">
+            <a href="/calendar/{{ prev_year }}/{{ prev_month }}" class="btn btn-light border"><i class="bi bi-chevron-left"></i></a>
+            <h2 class="mb-0 fw-bold">{{ month_name }} {{ current_year }}</h2>
+            <a href="/calendar/{{ next_year }}/{{ next_month }}" class="btn btn-light border"><i class="bi bi-chevron-right"></i></a>
+        </div>
+
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal">
+            <i class="bi bi-plus-lg"></i> Add Event
+        </button>
     </div>
 
-    <div class="table-responsive shadow-sm">
-        <table class="table table-bordered mb-0 table-custom">
+    <div class="calendar-table">
+        <table class="w-100">
             <thead>
                 <tr>
-                    <th class="time-col">Time</th>
-                    {% for day in days %}
-                        <th class="day-header text-center">{{ day }}</th>
-                    {% endfor %}
+                    <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
                 </tr>
             </thead>
             <tbody>
-                {% for hour in hours %}
+                {% for week in month_days %}
                 <tr>
-                    <td class="time-col">
-                        {% if hour > 12 %} {{ hour - 12 }} PM
-                        {% elif hour == 12 %} 12 PM
-                        {% else %} {{ hour }} AM
-                        {% endif %}
-                    </td>
-                    {% for day in days %}
-                    <td class="p-2 align-middle">
-                        {% set sub = timetable[hour][day] %}
-                        {% if sub %}
-                            <div class="class-card">
-                                <div class="fw-bold">{{ sub.code }}</div>
-                                <div class="small text-dark opacity-75">{{ sub.name }}</div>
-                            </div>
-                        {% else %}
-                            <div class="empty-cell"></div>
-                        {% endif %}
-                    </td>
+                    {% for day in week %}
+                        <td onclick="openAddEventModal('{{ day.strftime('%Y-%m-%d') }}')" 
+                            class="{% if day.month != current_month %}bg-light{% endif %}">
+                            
+                            <span class="day-number {% if day.month != current_month %}text-muted-day{% endif %}">
+                                {{ day.day }}
+                            </span>
+
+                            {% set date_key = day.strftime('%Y-%m-%d') %}
+                            {% if date_key in events_by_date %}
+                                {% for event in events_by_date[date_key] %}
+                                    <div class="event-badge bg-{{ event.tag }}">
+                                        {{ event.title }}
+                                        {% if not event.is_assignment %}
+                                            <a href="/delete_event/{{ event.id }}" class="float-end text-white ms-1" onclick="event.stopPropagation()">×</a>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
@@ -75,5 +104,49 @@
     </div>
 </div>
 
+<div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Add Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/add_event" method="POST">
+                    <input type="date" name="date" id="eventDateInput" class="form-control mb-3" required>
+                    <input type="text" name="title" class="form-control mb-3" placeholder="Event Title (e.g. Football Match)" required>
+                    
+                    <label class="form-label small fw-bold text-muted">CATEGORY / COLOR</label>
+                    <div class="d-flex gap-2">
+                        <input type="radio" class="btn-check" name="tag" id="tag1" value="primary" checked>
+                        <label class="btn btn-outline-primary w-100" for="tag1">Study</label>
+
+                        <input type="radio" class="btn-check" name="tag" id="tag2" value="success">
+                        <label class="btn btn-outline-success w-100" for="tag2">Social</label>
+
+                        <input type="radio" class="btn-check" name="tag" id="tag3" value="info">
+                        <label class="btn btn-outline-info w-100" for="tag3">Work</label>
+                        
+                        <input type="radio" class="btn-check" name="tag" id="tag4" value="secondary">
+                        <label class="btn btn-outline-secondary w-100" for="tag4">Other</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mt-4">Save Event</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openAddEventModal(date) {
+        // Set the date input to the clicked date
+        document.getElementById('eventDateInput').value = date;
+        // Open Modal
+        var myModal = new bootstrap.Modal(document.getElementById('eventModal'));
+        myModal.show();
+    }
+</script>
 </body>
 </html>

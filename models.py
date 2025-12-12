@@ -12,7 +12,7 @@ class Subject(db.Model):
     attended = db.Column(db.Integer, default=0)
     total_classes = db.Column(db.Integer, default=0)
     
-    # New Resource Locker Fields
+    # Resources
     syllabus_link = db.Column(db.String(500))
     zoom_link = db.Column(db.String(500))
     professor_email = db.Column(db.String(100))
@@ -45,6 +45,14 @@ class Assignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     due_date = db.Column(db.Date, nullable=False)
-    # New Exam Flag
     is_exam = db.Column(db.Boolean, default=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
+
+# --- NEW: Event Model for Calendar ---
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    # Tag stores the color category: 'primary' (Blue), 'danger' (Red), 'success' (Green), etc.
+    tag = db.Column(db.String(20), default='primary')
+    description = db.Column(db.String(500))
