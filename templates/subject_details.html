@@ -5,87 +5,44 @@
     <title>{{ subject.name }} - Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-body: #f4f7f6; --primary-color: #2c3e50; --brand-color: #0d6efd; }
-        body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; color: #212529; }
-        h2, h5 { font-family: 'Manrope', sans-serif; }
-        .pro-card { background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 2rem; }
-        .form-control { background-color: #f8f9fa; border: 1px solid #e9ecef; }
-        .form-control:focus { background-color: white; border-color: var(--brand-color); box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1); }
-        .btn-save { background: var(--brand-color); border: none; padding: 0.6rem 2rem; border-radius: 8px; color: white; font-weight: 500; }
-        .btn-save:hover { background-color: #0b5ed7; }
-        .link-card { background: #f8f9fa; border: 1px dashed #ced4da; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
-        .input-group-text { background: #e9ecef; border-color: #e9ecef; color: #6c757d; font-weight: 600; font-size: 0.85rem; }
+        body { background-color: #f0fdf4; font-family: 'Inter', sans-serif; color: #111827; }
+        h2, h5 { font-family: 'Outfit', sans-serif; }
+        .pro-card { background: white; border: 1px solid #d1fae5; border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .form-control { background-color: #f9fafb; border: 1px solid #d1d5db; }
+        .form-control:focus { background-color: white; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+        .btn-save { background: #10b981; border: none; padding: 10px 30px; border-radius: 10px; color: white; font-weight: 600; }
+        .link-card { background: #f0fdf4; border: 1px dashed #6ee7b7; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .input-group-text { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
+        a { text-decoration: none; }
     </style>
 </head>
 <body>
-
 <div class="container py-5" style="max-width: 800px;">
     <div class="d-flex align-items-center mb-4">
-        <a href="/" class="btn btn-outline-secondary rounded-circle me-3"><i class="bi bi-arrow-left"></i></a>
-        <div>
-            <h2 class="fw-bold mb-0">{{ subject.name }}</h2>
-            <div class="text-muted">{{ subject.code }} • {{ subject.professor }}</div>
-        </div>
+        <a href="/" class="btn btn-outline-secondary rounded-circle me-3 bg-white"><i class="bi bi-arrow-left"></i></a>
+        <div><h2 class="fw-bold mb-0">{{ subject.name }}</h2><div class="text-muted">{{ subject.code }} • {{ subject.professor }}</div></div>
     </div>
-
     <form action="/update_resources/{{ subject.id }}" method="POST">
-        
         <div class="pro-card">
-            <h5 class="fw-bold mb-4 text-uppercase text-secondary" style="font-size: 0.85rem; letter-spacing: 1px;">Syllabus Modules</h5>
-            
+            <h5 class="fw-bold mb-4 text-uppercase text-muted" style="font-size: 0.8rem; letter-spacing: 1px;">Syllabus Modules</h5>
             <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <label class="form-label small fw-bold text-muted">TOTAL MODULES/UNITS</label>
-                    <input type="number" name="total_modules" class="form-control" value="{{ subject.total_modules }}" min="1">
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label small fw-bold text-primary"><i class="bi bi-person-fill me-1"></i> MY PROGRESS</label>
-                    <div class="input-group">
-                        <input type="number" step="0.1" name="completed_student" class="form-control" value="{{ subject.completed_student }}" min="0">
-                        <span class="input-group-text">Modules</span>
-                    </div>
-                    <div class="form-text small">e.g. 2.5 modules done</div>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label small fw-bold text-warning"><i class="bi bi-easel-fill me-1"></i> TEACHER'S PROGRESS</label>
-                    <div class="input-group">
-                        <input type="number" step="0.1" name="completed_teacher" class="form-control" value="{{ subject.completed_teacher }}" min="0">
-                        <span class="input-group-text">Modules</span>
-                    </div>
-                </div>
+                <div class="col-12"><label class="form-label small fw-bold text-muted">TOTAL MODULES</label><input type="number" name="total_modules" class="form-control" value="{{ subject.total_modules }}" min="1"></div>
+                <div class="col-md-6"><label class="form-label small fw-bold text-primary" style="color: #10b981 !important;">MY PROGRESS</label><div class="input-group"><input type="number" step="0.1" name="completed_student" class="form-control" value="{{ subject.completed_student }}" min="0"><span class="input-group-text">Units</span></div></div>
+                <div class="col-md-6"><label class="form-label small fw-bold text-warning">TEACHER'S PROGRESS</label><div class="input-group"><input type="number" step="0.1" name="completed_teacher" class="form-control" value="{{ subject.completed_teacher }}" min="0"><span class="input-group-text">Units</span></div></div>
             </div>
         </div>
-
         <div class="pro-card">
-            <h5 class="fw-bold mb-4 text-uppercase text-secondary" style="font-size: 0.85rem; letter-spacing: 1px;">Resource Locker</h5>
+            <h5 class="fw-bold mb-4 text-uppercase text-muted" style="font-size: 0.8rem; letter-spacing: 1px;">Resources</h5>
             <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="link-card">
-                        <label class="small text-muted fw-bold mb-1">ZOOM / MEET LINK</label>
-                        <input type="text" name="zoom_link" class="form-control form-control-sm" placeholder="Paste URL..." value="{{ subject.zoom_link or '' }}">
-                        {% if subject.zoom_link %}<a href="{{ subject.zoom_link }}" target="_blank" class="d-block mt-2 small text-primary fw-bold">Open <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="link-card">
-                        <label class="small text-muted fw-bold mb-1">SYLLABUS / DRIVE</label>
-                        <input type="text" name="syllabus_link" class="form-control form-control-sm" placeholder="Paste URL..." value="{{ subject.syllabus_link or '' }}">
-                        {% if subject.syllabus_link %}<a href="{{ subject.syllabus_link }}" target="_blank" class="d-block mt-2 small text-primary fw-bold">Open <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}
-                    </div>
-                </div>
+                <div class="col-md-6"><div class="link-card"><label class="small text-muted fw-bold mb-1">ZOOM LINK</label><input type="text" name="zoom_link" class="form-control form-control-sm" value="{{ subject.zoom_link or '' }}">{% if subject.zoom_link %}<a href="{{ subject.zoom_link }}" target="_blank" class="d-block mt-2 small text-success">Open Link <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}</div></div>
+                <div class="col-md-6"><div class="link-card"><label class="small text-muted fw-bold mb-1">DRIVE / SYLLABUS</label><input type="text" name="syllabus_link" class="form-control form-control-sm" value="{{ subject.syllabus_link or '' }}">{% if subject.syllabus_link %}<a href="{{ subject.syllabus_link }}" target="_blank" class="d-block mt-2 small text-success">Open Link <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}</div></div>
             </div>
-            <div class="mb-4">
-                <label class="small text-muted fw-bold mb-2">QUICK NOTES</label>
-                <textarea name="notes" class="form-control" rows="5" placeholder="Write notes here...">{{ subject.notes or '' }}</textarea>
-            </div>
-            <div class="text-end"><button type="submit" class="btn btn-save">Save All Changes</button></div>
+            <div class="mb-4"><label class="small text-muted fw-bold mb-2">NOTES</label><textarea name="notes" class="form-control" rows="5">{{ subject.notes or '' }}</textarea></div>
+            <div class="text-end"><button type="submit" class="btn btn-save">Save Changes</button></div>
         </div>
     </form>
 </div>
-
 </body>
 </html>

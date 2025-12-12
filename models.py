@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 import math
-from datetime import date
+from datetime import date, datetime
 
 db = SQLAlchemy()
 
@@ -12,18 +12,13 @@ class Subject(db.Model):
     schedule = db.Column(db.String(100))
     attended = db.Column(db.Integer, default=0)
     total_classes = db.Column(db.Integer, default=0)
-    
-    # Resources
     syllabus_link = db.Column(db.String(500))
     zoom_link = db.Column(db.String(500))
     professor_email = db.Column(db.String(100))
     notes = db.Column(db.Text)
-
-    # Syllabus Tracking
     total_modules = db.Column(db.Integer, default=5)
     completed_student = db.Column(db.Float, default=0.0)
     completed_teacher = db.Column(db.Float, default=0.0)
-    
     assignments = db.relationship('Assignment', backref='subject', lazy=True, cascade="all, delete-orphan")
     attendance_logs = db.relationship('AttendanceLog', backref='subject', lazy=True, cascade="all, delete-orphan")
 
@@ -62,17 +57,16 @@ class Assignment(db.Model):
     due_date = db.Column(db.Date, nullable=False)
     is_exam = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(20), default='Pending')
-    
-    # NEW: Eisenhower Matrix Position (q1=Do, q2=Schedule, q3=Delegate, q4=Delete)
     matrix_quadrant = db.Column(db.String(10), default='q2') 
-    
+    # NEW: Color Tag (Stores values like 'emerald', 'blue', 'rose')
+    color_tag = db.Column(db.String(20), default='emerald') 
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     date = db.Column(db.Date, nullable=False)
-    tag = db.Column(db.String(20), default='primary')
+    tag = db.Column(db.String(20), default='emerald')
     description = db.Column(db.String(500))
 
 class Note(db.Model):
@@ -89,3 +83,11 @@ class Settings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_name = db.Column(db.String(100), default="Student")
     university = db.Column(db.String(100), default="My University")
+
+class CareerItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    category = db.Column(db.String(50))
+    tech_stack = db.Column(db.String(200))
+    date = db.Column(db.Date, default=date.today)
+    link = db.Column(db.String(500))

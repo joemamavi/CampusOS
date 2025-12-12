@@ -2,99 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ month_name }} {{ current_year }} - Calendar</title>
+    <title>Calendar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-body: #f4f7f6;
-            --primary-color: #2c3e50;
-        }
-        body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; }
-        h2, h5 { font-family: 'Manrope', sans-serif; }
-
-        /* Calendar Grid */
-        .calendar-table { table-layout: fixed; width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .calendar-table th { background: #f8f9fa; text-align: center; padding: 15px; font-weight: 600; color: #6c757d; text-transform: uppercase; font-size: 0.85rem; border-bottom: 1px solid #e9ecef; }
-        .calendar-table td { height: 140px; vertical-align: top; border: 1px solid #e9ecef; padding: 8px; transition: 0.2s; cursor: pointer; }
-        .calendar-table td:hover { background-color: #f8f9fa; }
+        body { background-color: #f0fdf4; font-family: 'Inter', sans-serif; color: #111827; }
+        h2 { font-family: 'Outfit', sans-serif; }
+        .calendar-table { table-layout: fixed; width: 100%; background: white; border-radius: 20px; border: 1px solid #d1fae5; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .calendar-table th { background: #f0fdf4; color: #059669; text-align: center; padding: 15px; border-bottom: 1px solid #d1fae5; font-weight: 600; }
+        .calendar-table td { height: 140px; vertical-align: top; border: 1px solid #d1fae5; padding: 10px; transition: 0.2s; cursor: pointer; }
+        .calendar-table td:hover { background-color: #f0fdf4; }
+        .day-number { font-weight: 700; color: #111827; margin-bottom: 8px; display: block; }
+        .text-muted-day { color: #9ca3af !important; }
+        .event-badge { display: block; padding: 4px 8px; margin-bottom: 4px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; color: white; text-decoration: none; }
         
-        .day-number { font-weight: 700; color: #495057; margin-bottom: 8px; display: block; }
-        .text-muted-day { color: #dee2e6 !important; } /* Days from prev/next month */
-        
-        /* Event Badges */
-        .event-badge { 
-            display: block; 
-            padding: 4px 8px; 
-            margin-bottom: 4px; 
-            border-radius: 6px; 
-            font-size: 0.75rem; 
-            font-weight: 500; 
-            text-decoration: none; 
-            color: white; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            transition: 0.2s;
-        }
-        .event-badge:hover { opacity: 0.9; color: white; transform: translateY(-1px); }
+        .bg-emerald { background-color: #10b981 !important; } .bg-blue { background-color: #3b82f6 !important; } .bg-purple { background-color: #8b5cf6 !important; }
+        .bg-amber { background-color: #f59e0b !important; } .bg-rose { background-color: #f43f5e !important; } .bg-slate { background-color: #64748b !important; }
+        .bg-primary { background-color: #10b981 !important; }
 
-        /* Color Tags */
-        .bg-primary { background-color: #0d6efd !important; } /* Study/General */
-        .bg-danger { background-color: #dc3545 !important; }  /* Exams */
-        .bg-warning { background-color: #fd7e14 !important; color: white !important; } /* Assignments */
-        .bg-success { background-color: #198754 !important; } /* Social/Club */
-        .bg-info { background-color: #0dcaf0 !important; color: white !important; }   /* Work */
+        .btn-primary { background: #10b981; border: none; }
+        .btn-light { border: 1px solid #d1d5db; background: white; }
     </style>
 </head>
 <body>
-
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Dashboard</a>
-        
+        <a href="/" class="btn btn-outline-secondary bg-white"><i class="bi bi-arrow-left"></i> Dashboard</a>
         <div class="d-flex align-items-center gap-3">
-            <a href="/calendar/{{ prev_year }}/{{ prev_month }}" class="btn btn-light border"><i class="bi bi-chevron-left"></i></a>
+            <a href="/calendar/{{ prev_year }}/{{ prev_month }}" class="btn btn-light"><i class="bi bi-chevron-left"></i></a>
             <h2 class="mb-0 fw-bold">{{ month_name }} {{ current_year }}</h2>
-            <a href="/calendar/{{ next_year }}/{{ next_month }}" class="btn btn-light border"><i class="bi bi-chevron-right"></i></a>
+            <a href="/calendar/{{ next_year }}/{{ next_month }}" class="btn btn-light"><i class="bi bi-chevron-right"></i></a>
         </div>
-
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal">
-            <i class="bi bi-plus-lg"></i> Add Event
-        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal">+ Event</button>
     </div>
-
     <div class="calendar-table">
         <table class="w-100">
-            <thead>
-                <tr>
-                    <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr></thead>
             <tbody>
                 {% for week in month_days %}
                 <tr>
                     {% for day in week %}
-                        <td onclick="openAddEventModal('{{ day.strftime('%Y-%m-%d') }}')" 
-                            class="{% if day.month != current_month %}bg-light{% endif %}">
-                            
-                            <span class="day-number {% if day.month != current_month %}text-muted-day{% endif %}">
-                                {{ day.day }}
-                            </span>
-
+                        <td onclick="openAddEventModal('{{ day.strftime('%Y-%m-%d') }}')" class="{% if day.month != current_month %}bg-light{% endif %}">
+                            <span class="day-number {% if day.month != current_month %}text-muted-day{% endif %}">{{ day.day }}</span>
                             {% set date_key = day.strftime('%Y-%m-%d') %}
-                            {% if date_key in events_by_date %}
-                                {% for event in events_by_date[date_key] %}
-                                    <div class="event-badge bg-{{ event.tag }}">
-                                        {{ event.title }}
-                                        {% if not event.is_assignment %}
-                                            <a href="/delete_event/{{ event.id }}" class="float-end text-white ms-1" onclick="event.stopPropagation()">×</a>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
-                            {% endif %}
+                            {% if date_key in events_by_date %}{% for event in events_by_date[date_key] %}<div class="event-badge bg-{{ event.tag }}">{{ event.title }}</div>{% endfor %}{% endif %}
                         </td>
                     {% endfor %}
                 </tr>
@@ -103,50 +55,8 @@
         </table>
     </div>
 </div>
-
-<div class="modal fade" id="eventModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Add Event</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form action="/add_event" method="POST">
-                    <input type="date" name="date" id="eventDateInput" class="form-control mb-3" required>
-                    <input type="text" name="title" class="form-control mb-3" placeholder="Event Title (e.g. Football Match)" required>
-                    
-                    <label class="form-label small fw-bold text-muted">CATEGORY / COLOR</label>
-                    <div class="d-flex gap-2">
-                        <input type="radio" class="btn-check" name="tag" id="tag1" value="primary" checked>
-                        <label class="btn btn-outline-primary w-100" for="tag1">Study</label>
-
-                        <input type="radio" class="btn-check" name="tag" id="tag2" value="success">
-                        <label class="btn btn-outline-success w-100" for="tag2">Social</label>
-
-                        <input type="radio" class="btn-check" name="tag" id="tag3" value="info">
-                        <label class="btn btn-outline-info w-100" for="tag3">Work</label>
-                        
-                        <input type="radio" class="btn-check" name="tag" id="tag4" value="secondary">
-                        <label class="btn btn-outline-secondary w-100" for="tag4">Other</label>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100 mt-4">Save Event</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+<div class="modal fade" id="eventModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-bottom"><h5 class="modal-title fw-bold">Add Event</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form action="/add_event" method="POST"><input type="date" name="date" id="eventDateInput" class="form-control mb-3" required><input type="text" name="title" class="form-control mb-3" placeholder="Event Title" required><label class="small text-muted fw-bold mb-2">COLOR TAG</label><div class="d-flex mb-4 gap-2"><input type="radio" name="tag" value="emerald" id="e1" class="d-none" checked><label for="e1" class="color-option bg-emerald" style="width:30px;height:30px;border-radius:50%;cursor:pointer;"></label><input type="radio" name="tag" value="blue" id="e2" class="d-none"><label for="e2" class="color-option bg-blue" style="width:30px;height:30px;border-radius:50%;cursor:pointer;"></label><input type="radio" name="tag" value="rose" id="e3" class="d-none"><label for="e3" class="color-option bg-rose" style="width:30px;height:30px;border-radius:50%;cursor:pointer;"></label></div><button type="submit" class="btn btn-primary w-100 mt-4">Save</button></form></div></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    function openAddEventModal(date) {
-        // Set the date input to the clicked date
-        document.getElementById('eventDateInput').value = date;
-        // Open Modal
-        var myModal = new bootstrap.Modal(document.getElementById('eventModal'));
-        myModal.show();
-    }
-</script>
+<script>function openAddEventModal(date) { document.getElementById('eventDateInput').value = date; var myModal = new bootstrap.Modal(document.getElementById('eventModal')); myModal.show(); }</script>
 </body>
 </html>

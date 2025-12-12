@@ -5,112 +5,40 @@
     <title>Decision Matrix</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Manrope', sans-serif; height: 100vh; overflow: hidden; }
-        .matrix-container { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: calc(100vh - 100px); gap: 15px; padding: 20px; }
-        .quadrant { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .quadrant h6 { font-weight: 700; text-transform: uppercase; margin-bottom: 15px; font-size: 0.85rem; letter-spacing: 1px; color: #6c757d; }
-        
-        .q1 { border-top: 5px solid #dc3545; } /* Do First - Red */
-        .q2 { border-top: 5px solid #0d6efd; } /* Schedule - Blue */
-        .q3 { border-top: 5px solid #ffc107; } /* Delegate - Yellow */
-        .q4 { border-top: 5px solid #6c757d; } /* Delete - Gray */
-
-        .task-list { flex-grow: 1; overflow-y: auto; padding: 5px; }
-        .task-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: grab; transition: transform 0.1s; }
-        .task-card:active { cursor: grabbing; transform: scale(1.02); }
-        .dragging { opacity: 0.5; }
+        body { background-color: #f0fdf4; font-family: 'Outfit', sans-serif; height: 100vh; overflow: hidden; color: #111827; }
+        .matrix-container { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: calc(100vh - 100px); gap: 20px; padding: 20px; }
+        .quadrant { background: white; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; border: 1px solid #d1fae5; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
+        .quadrant h6 { font-weight: 700; text-transform: uppercase; margin-bottom: 15px; font-size: 0.85rem; letter-spacing: 1px; color: #6b7280; }
+        .q1 { border-top: 4px solid #ef4444; } .q2 { border-top: 4px solid #10b981; } .q3 { border-top: 4px solid #f59e0b; } .q4 { border-top: 4px solid #6b7280; } 
+        .task-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: grab; color: #1f2937; transition: 0.2s; }
+        .task-card:hover { border-color: #10b981; transform: translateY(-2px); background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .task-list { flex-grow: 1; overflow-y: auto; }
+        .btn-outline-dark { border-color: #d1d5db; }
+        .btn-outline-dark:hover { background: white; }
     </style>
 </head>
 <body>
-
-<div class="d-flex justify-content-between align-items-center px-4 pt-3 pb-0">
-    <h4 class="fw-bold"><i class="bi bi-grid-1x2-fill me-2 text-primary"></i>Decision Matrix</h4>
-    <a href="/" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Dashboard</a>
+<div class="d-flex justify-content-between align-items-center px-4 pt-4 pb-0">
+    <h4 class="fw-bold text-dark"><i class="bi bi-layers-fill me-2 text-success"></i>Decision Matrix</h4>
+    <a href="/" class="btn btn-outline-dark btn-sm bg-white">Dashboard</a>
 </div>
-
 <div class="matrix-container">
-    <div class="quadrant q1" ondragover="allowDrop(event)" ondrop="drop(event, 'q1')">
-        <h6><i class="bi bi-lightning-charge-fill text-danger me-2"></i>Do First (Urgent & Important)</h6>
-        <div class="task-list" id="q1-list">
-            {% for t in matrix['q1'] %}
-                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
-                    <div class="fw-bold">{{ t.title }}</div>
-                    <div class="small text-muted">{{ t.subject.code }} • {{ t.due_date.strftime('%b %d') }}</div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="quadrant q2" ondragover="allowDrop(event)" ondrop="drop(event, 'q2')">
-        <h6><i class="bi bi-calendar-check-fill text-primary me-2"></i>Schedule (Important, Not Urgent)</h6>
-        <div class="task-list" id="q2-list">
-            {% for t in matrix['q2'] %}
-                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
-                    <div class="fw-bold">{{ t.title }}</div>
-                    <div class="small text-muted">{{ t.subject.code }} • {{ t.due_date.strftime('%b %d') }}</div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="quadrant q3" ondragover="allowDrop(event)" ondrop="drop(event, 'q3')">
-        <h6><i class="bi bi-people-fill text-warning me-2"></i>Delegate (Urgent, Not Important)</h6>
-        <div class="task-list" id="q3-list">
-            {% for t in matrix['q3'] %}
-                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
-                    <div class="fw-bold">{{ t.title }}</div>
-                    <div class="small text-muted">{{ t.subject.code }} • {{ t.due_date.strftime('%b %d') }}</div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="quadrant q4" ondragover="allowDrop(event)" ondrop="drop(event, 'q4')">
-        <h6><i class="bi bi-trash3-fill text-secondary me-2"></i>Delete (Neither)</h6>
-        <div class="task-list" id="q4-list">
-            {% for t in matrix['q4'] %}
-                <div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}">
-                    <div class="fw-bold">{{ t.title }}</div>
-                    <div class="small text-muted">{{ t.subject.code }} • {{ t.due_date.strftime('%b %d') }}</div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
+    <div class="quadrant q1" ondragover="allowDrop(event)" ondrop="drop(event, 'q1')"><h6>Do First</h6><div class="task-list" id="q1-list">{% for t in matrix['q1'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
+    <div class="quadrant q2" ondragover="allowDrop(event)" ondrop="drop(event, 'q2')"><h6>Schedule</h6><div class="task-list" id="q2-list">{% for t in matrix['q2'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
+    <div class="quadrant q3" ondragover="allowDrop(event)" ondrop="drop(event, 'q3')"><h6>Delegate</h6><div class="task-list" id="q3-list">{% for t in matrix['q3'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
+    <div class="quadrant q4" ondragover="allowDrop(event)" ondrop="drop(event, 'q4')"><h6>Delete</h6><div class="task-list" id="q4-list">{% for t in matrix['q4'] %}<div class="task-card" draggable="true" ondragstart="drag(event)" id="task-{{ t.id }}"><div class="fw-bold">{{ t.title }}</div><div class="small text-muted">{{ t.subject.code }}</div></div>{% endfor %}</div></div>
 </div>
-
 <script>
-    function allowDrop(ev) {
-        ev.preventDefault();
-    }
-
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id);
-        ev.target.classList.add('dragging');
-    }
-
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
     function drop(ev, quadrant) {
-        ev.preventDefault();
-        var data = ev.dataTransfer.getData("text");
-        var draggedElement = document.getElementById(data);
-        draggedElement.classList.remove('dragging');
-        
-        // Find the correct drop target (ensure it's the .task-list div)
-        var dropTarget = ev.target;
-        while (!dropTarget.classList.contains('quadrant')) {
-            dropTarget = dropTarget.parentElement;
-        }
-        var list = dropTarget.querySelector('.task-list');
-        list.appendChild(draggedElement);
-
-        // AJAX Update to Backend
-        var taskId = data.split('-')[1];
-        fetch(`/update_quadrant/${taskId}/${quadrant}`)
-            .then(response => response.json())
-            .then(data => console.log("Updated"));
+        ev.preventDefault(); var data = ev.dataTransfer.getData("text");
+        var dropTarget = ev.target; while (!dropTarget.classList.contains('quadrant')) { dropTarget = dropTarget.parentElement; }
+        dropTarget.querySelector('.task-list').appendChild(document.getElementById(data));
+        fetch(`/update_quadrant/${data.split('-')[1]}/${quadrant}`);
     }
 </script>
-
 </body>
 </html>
