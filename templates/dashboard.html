@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -47,15 +48,15 @@
         .exam-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; padding: 30px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
         .exam-banner h1, .exam-banner div { color: white !important; }
 
-        /* COLOR STUDIO (NEW) */
+        /* COACH WIDGET */
+        .coach-card { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 16px; padding: 20px; margin-top: 25px; }
+        .coach-icon { color: #d97706; background: #fef3c7; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 1.2rem; }
+
+        /* COLOR STUDIO */
         .color-option { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; display: inline-block; margin-right: 8px; }
         .color-option:hover, .color-option.active { transform: scale(1.2); border-color: #1f2937; }
-        
-        /* Color Classes */
         .bg-emerald { background-color: #10b981; } .bg-blue { background-color: #3b82f6; } .bg-purple { background-color: #8b5cf6; }
         .bg-amber { background-color: #f59e0b; } .bg-rose { background-color: #f43f5e; } .bg-slate { background-color: #64748b; }
-        
-        /* Task Border Strips */
         .task-strip { width: 5px; height: 100%; position: absolute; left: 0; top: 0; border-radius: 4px 0 0 4px; }
         .border-emerald { background-color: #10b981; } .border-blue { background-color: #3b82f6; } .border-purple { background-color: #8b5cf6; }
         .border-amber { background-color: #f59e0b; } .border-rose { background-color: #f43f5e; } .border-slate { background-color: #64748b; }
@@ -101,7 +102,7 @@
         <div><h2 class="fw-bold mb-1">Hi, {{ settings.student_name.split(' ')[0] }}! 👋</h2><p class="text-muted mb-0">"{{ quote }}"</p></div>
         <div class="d-flex gap-3">
             <form action="/search" method="GET"><div class="search-box"><i class="bi bi-search"></i><input type="text" name="q" placeholder="Search..."></div></form>
-            <button class="btn btn-primary rounded-circle shadow-lg" data-bs-toggle="modal" data-bs-target="#subjectModal" style="width: 48px; height: 48px;"><i class="bi bi-plus-lg fs-5"></i></button>
+            <button class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0" data-bs-toggle="modal" data-bs-target="#subjectModal" style="width: 48px; height: 48px;"><i class="bi bi-plus-lg fs-5"></i></button>
         </div>
     </div>
 
@@ -137,6 +138,7 @@
 
     <div class="row g-4">
         <div class="col-lg-8">
+            
             <div class="dashboard-card p-0 overflow-hidden">
                 <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-light bg-opacity-50">
                     <h5 class="fw-bold mb-0">📚 My Courses</h5>
@@ -173,6 +175,25 @@
                     </table>
                 </div>
             </div>
+
+            <div class="coach-card d-flex align-items-start gap-3">
+                <div class="coach-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                <div>
+                    <h6 class="fw-bold mb-1" style="color: #92400e;">Smart Efficiency Tip</h6>
+                    <p class="mb-0 small" style="color: #b45309; line-height: 1.5;">
+                        {% if gaps %}
+                            🚀 <strong>Gap Strategy:</strong> You have a {{ gaps[0].end - gaps[0].start }}h break at {{ gaps[0].start }}:00. Perfect time to finish short 'Delegate' tasks.
+                        {% elif bottlenecks %}
+                            🛡️ <strong>Burnout Defense:</strong> Heavy workload detected on {{ bottlenecks[0].date.strftime('%a') }}. Use the <i>Pomodoro Technique</i> (25m work, 5m break) to stay focused.
+                        {% elif exams %}
+                            🧠 <strong>Active Recall:</strong> Exams are close! Instead of re-reading notes, try to teach the concepts to an imaginary class.
+                        {% else %}
+                            📅 <strong>Plan Ahead:</strong> Your schedule is light today. Use this time to update your <b>Career Vault</b> or learn a new skill.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
         </div>
 
         <div class="col-lg-4">
