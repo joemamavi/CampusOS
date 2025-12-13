@@ -1,6 +1,6 @@
 {
-  "name": "UniPlanner",
-  "short_name": "Planner",
+  "name": "CampusOS",
+  "short_name": "CampusOS",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f0fdf4",

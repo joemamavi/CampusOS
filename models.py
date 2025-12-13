@@ -19,7 +19,6 @@ class Subject(db.Model):
     total_modules = db.Column(db.Integer, default=5)
     completed_student = db.Column(db.Float, default=0.0)
     completed_teacher = db.Column(db.Float, default=0.0)
-    
     assignments = db.relationship('Assignment', backref='subject', lazy=True, cascade="all, delete-orphan")
     attendance_logs = db.relationship('AttendanceLog', backref='subject', lazy=True, cascade="all, delete-orphan")
 
@@ -59,7 +58,11 @@ class Assignment(db.Model):
     is_exam = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(20), default='Pending')
     matrix_quadrant = db.Column(db.String(10), default='q2') 
-    color_tag = db.Column(db.String(20), default='emerald') 
+    color_tag = db.Column(db.String(20), default='emerald')
+    
+    # NEW: Task Estimator Field
+    estimated_hours = db.Column(db.Float, default=1.0) 
+    
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
 
 class Event(db.Model):
