@@ -60,4 +60,3 @@ Follow these steps to run CampusOS locally:
 5.  **Access the App**
     Open your browser and navigate to: `http://127.0.0.1:5000`
 
-## 📂 Project Structure
